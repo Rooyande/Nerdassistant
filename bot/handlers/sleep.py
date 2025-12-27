@@ -1,13 +1,13 @@
 import re
-from aiogram.filters import Command
-from aiogram.types import FSInputFile
-from bot.repositories.sleep_repo import get_sleep_sessions_last_days
-from bot.charts.sleep_weekly import build_sleep_weekly_chart
-from aiogram import Router
+from aiogram import Router, F
 from aiogram.types import Message
 
 from bot.models.db import SessionLocal
 from bot.services.sleep_service import handle_gn, handle_gm
+from aiogram.filters import Command
+from aiogram.types import FSInputFile
+from bot.repositories.sleep_repo import get_sleep_sessions_last_days
+from bot.charts.sleep_weekly import build_sleep_weekly_chart
 
 router = Router()
 
@@ -19,6 +19,8 @@ GN_PATTERNS = [
     r"شبت\s*بخیر",
     r"😴",
     r"🌙",
+    r"おやすみ",
+    r"おやすみなさい",
     r"\boyasumi\b",
 ]
 
@@ -30,8 +32,11 @@ GM_PATTERNS = [
     r"صبحت\s*بخیر",
     r"☀️",
     r"🌞",
+    r"おはよう",
+    r"おはようございます",
     r"\bohio\b",
     r"اوهایو",
+    r"\bohayou\b",
 ]
 
 
@@ -41,6 +46,7 @@ def matches_any(text: str, patterns: list[str]) -> bool:
         if re.search(p, text, flags=re.IGNORECASE):
             return True
     return False
+
 
 @router.message(Command("sleep_weekly"))
 async def sleep_weekly_report(message: Message):
@@ -61,27 +67,28 @@ async def sleep_weekly_report(message: Message):
     )
 
 
-@router.message()
-async def sleep_listener(message: Message):
-    if not message.text:
-        return
-
-    text = message.text
+@router.message(F.text.func(lambda t: matches_any(t, GN_PATTERNS)))
+async def gn_handler(message: Message):
     user_id = message.from_user.id if message.from_user else 0
     chat_id = message.chat.id
-
     if user_id == 0:
         return
 
-    if matches_any(text, GN_PATTERNS):
-        async with SessionLocal() as session:
-            reply = await handle_gn(session, user_id, chat_id)
-        await message.reply(reply)
+    async with SessionLocal() as session:
+        reply = await handle_gn(session, user_id, chat_id)
+
+    await message.reply(reply)
+
+
+@router.message(F.text.func(lambda t: matches_any(t, GM_PATTERNS)))
+async def gm_handler(message: Message):
+    user_id = message.from_user.id if message.from_user else 0
+    chat_id = message.chat.id
+    if user_id == 0:
         return
 
-    if matches_any(text, GM_PATTERNS):
-        async with SessionLocal() as session:
-            reply = await handle_gm(session, user_id, chat_id)
-        await message.reply(reply)
-        return
+    async with SessionLocal() as session:
+        reply = await handle_gm(session, user_id, chat_id)
+
+    await message.reply(reply)
 

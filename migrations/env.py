@@ -20,6 +20,7 @@ if config.config_file_name is not None:
 # target_metadata = mymodel.Base.metadata
 from bot.models.db import Base
 from bot.models.sleep import SleepSession  # noqa: F401
+from bot.models.steps import StepEntry  # noqa: F401
 
 target_metadata = Base.metadata
 
