@@ -28,9 +28,14 @@ async def steps_weekly_report(message: Message):
         caption="📊 گزارش هفتگی قدم‌ها (۷ روز اخیر)"
     )
 
-@router.message()
+from aiogram import F
+
+@router.message(F.text.regexp(r"(?i)^(steps|step|قدم)\s*[:=]?\s*[\d,]+$"))
 async def steps_listener(message: Message):
+
     if not message.text:
+        return
+    if message.text.strip().startswith("/"):
         return
 
     steps = extract_steps(message.text)

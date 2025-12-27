@@ -1,6 +1,7 @@
 import asyncio
 import logging
 from bot.handlers.steps import router as steps_router
+from bot.handlers.duel import router as duel_router
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from bot.models.db import SessionLocal
@@ -19,6 +20,7 @@ logger = logging.getLogger(__name__)
 dp = Dispatcher()
 dp.include_router(sleep_router)
 dp.include_router(steps_router)
+dp.include_router(duel_router)
 
 
 @dp.message(CommandStart())
