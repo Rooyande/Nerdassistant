@@ -35,3 +35,20 @@ async def set_gm_for_latest_open_session(
     await session.refresh(sleep)
     return sleep
 
+from datetime import datetime, timedelta, timezone
+
+async def get_sleep_sessions_last_days(
+    session: AsyncSession, user_id: int, chat_id: int, days: int = 7
+):
+    cutoff = datetime.now(timezone.utc) - timedelta(days=days)
+
+    stmt = (
+        select(SleepSession)
+        .where(SleepSession.user_id == user_id)
+        .where(SleepSession.chat_id == chat_id)
+        .where(SleepSession.gn_at >= cutoff)
+        .order_by(SleepSession.gn_at.asc())
+    )
+
+    res = await session.execute(stmt)
+    return res.scalars().all()

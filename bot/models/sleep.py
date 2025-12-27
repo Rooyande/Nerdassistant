@@ -14,6 +14,7 @@ class SleepSession(Base):
 
     gn_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     gm_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    reminded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow, nullable=False)
 
