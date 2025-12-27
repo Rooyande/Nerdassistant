@@ -13,6 +13,7 @@ services:
       - "5432:5432"
 
   bot:
+    build: .
     image: nerdassistant_bot:latest
     container_name: nerdassistant_bot
     restart: unless-stopped
