@@ -1,1 +1,30 @@
+services:
+  db:
+    image: postgres:16
+    container_name: nerdassistant_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: nerdbot
+      POSTGRES_USER: nerd
+      POSTGRES_PASSWORD: nerdpass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  bot:
+    image: nerdassistant_bot:latest
+    container_name: nerdassistant_bot
+    restart: unless-stopped
+    depends_on:
+      - db
+    env_file:
+      - .env
+    volumes:
+      - ./bot:/app/bot
+    working_dir: /app
+    command: ["python", "-m", "bot.main"]
+
+volumes:
+  postgres_data:
 
